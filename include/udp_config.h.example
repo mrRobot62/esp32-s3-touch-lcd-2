@@ -1,0 +1,17 @@
+#pragma once
+
+#include <IPAddress.h>
+
+namespace udp_config {
+
+/**
+ * @brief Example UDP configuration copied to `udp_config.h` for local development.
+ *
+ * The default remote port uses the standard syslog UDP port `514`, while the local
+ * port can be changed later if the firmware needs to listen on another endpoint.
+ */
+inline const IPAddress kServerIp(192, 168, 0, 100);
+inline constexpr uint16_t kServerPort = 514;
+inline constexpr uint16_t kLocalPort = 514;
+
+} // namespace udp_config
