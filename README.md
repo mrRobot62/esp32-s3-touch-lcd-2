@@ -1,6 +1,8 @@
 # esp32-s3-touch-lcd-2
 Demo programm for a cheap 2" esp32-s3 touch display with 240x320 pixels. Display chip ST7789T3.
 
+**This demo is without camera integration**
+
 ## Display
 <img width="951" alt="image" src="https://github.com/user-attachments/assets/48341bc4-64f1-41cd-ad30-bc6819e4698e" />
 
