@@ -1,5 +1,46 @@
-# esp32-s3-touch-lcd-2
-Demo programm for a cheap 2" esp32-s3 touch display with 240x320 pixels. Display chip ST7789T3.
+# ESP32-S3 Touch LCD 2 – Working Display + Touch Starter Project (Display driver : ST7789T3)
+
+This project provides a clean, working, and easy-to-understand starting point for the ESP32-S3 Touch LCD 2.
+
+While the hardware itself is interesting and powerful, there are still very few practical examples available that properly demonstrate how to use:
+
+* the LCD display
+* the capacitive touch controller
+* stable initialization
+* usable project structure
+* a clean foundation for custom GUI development
+
+Most official demos are either minimal, outdated, overly complex, or difficult to adapt for real projects. This repository was created to solve exactly that problem.  
+
+What this project offers
+
+✅ Working display initialization
+✅ Functional touch support
+✅ Clean and readable source code
+✅ Good base for LVGL / Arduino / custom UI projects
+✅ Easier to understand than vendor demo packages
+✅ Ready to extend for your own applications
+
+Why this repository exists
+
+Many developers buy this board because the hardware looks great — but quickly discover that getting display + touch running reliably is harder than expected.
+
+This project saves that time by providing a tested starting point instead of forcing users to reverse-engineer vendor demos or search through forum posts.
+
+Ideal for
+
+* Makers
+* ESP32 developers
+* UI / touchscreen projects
+* Rapid prototyping
+* Learning how this board works
+* Building your own custom firmware
+
+Goal
+
+To become a practical community reference project for anyone working with the ESP32-S3 Touch LCD 2.
+
+
 
 **This demo is without camera integration**
 
