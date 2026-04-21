@@ -9,7 +9,7 @@ Demo programm for a cheap 2" esp32-s3 touch display with 240x320 pixels. Display
 <img width="951" height="589" alt="image" src="https://github.com/user-attachments/assets/f74c02cf-123d-4389-b80e-1f93a696c2e7" />
 
 ### Pinout
-<img width="951" height="834" alt="image" src="https://github.com/user-attachments/assets/0f019452-c372-494e-8679-4042d7e96835" />
+<img width="951" alt="image" src="https://github.com/user-attachments/assets/0f019452-c372-494e-8679-4042d7e96835" />
 
 ### What's on board
 <img width="951" height="834" alt="image" src="https://github.com/user-attachments/assets/aec6aff6-ad2a-48de-9e7c-a4e608373e4e" />
