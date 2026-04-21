@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <Wire.h>
 
+#include "log_core.h"
 #include "udp_config.h"
 #include "wifi_secrets.h"
 
@@ -37,10 +38,12 @@ namespace hal {
  * depend on runtime configuration or later diagnostics output.
  */
 void HalContext::begin() {
+    INFO_TAG("HAL", "Starting HAL initialization.\n");
     setupI2c();
     scanI2cDevices();
     wifi_connected_ = setupWifi();
-    setupUdp();
+    udp_ready_ = setupUdp();
+    INFO_TAG("HAL", "HAL initialization finished.\n");
 }
 
 /**
@@ -49,7 +52,10 @@ void HalContext::begin() {
  * This method centralizes the I2C pin selection so a future hardware revision
  * only needs one update inside the HAL instead of multiple call sites.
  */
-void HalContext::setupI2c() { Wire.begin(kI2cSdaPin, kI2cSclPin); }
+void HalContext::setupI2c() {
+    INFO_TAG("HAL", "Initializing I2C on SDA=%u, SCL=%u.\n", kI2cSdaPin, kI2cSclPin);
+    Wire.begin(kI2cSdaPin, kI2cSclPin);
+}
 
 /**
  * @brief Scan the complete 7-bit I2C address space for responding devices.
@@ -61,14 +67,18 @@ void HalContext::setupI2c() { Wire.begin(kI2cSdaPin, kI2cSclPin); }
  */
 std::vector<uint8_t> HalContext::scanI2cDevices() {
     i2c_device_addresses_.clear();
+    INFO_TAG("HAL", "Scanning I2C bus for responding devices.\n");
 
     for (uint8_t address = 0x08; address <= 0x77; ++address) {
         Wire.beginTransmission(address);
         const uint8_t error = Wire.endTransmission();
         if (error == 0) {
             i2c_device_addresses_.push_back(address);
+            INFO_TAG("HAL", "I2C device acknowledged at 0x%02X.\n", address);
         }
     }
+
+    INFO_TAG("HAL", "I2C scan complete, found %u device(s).\n", static_cast<unsigned>(i2c_device_addresses_.size()));
 
     return i2c_device_addresses_;
 }
@@ -84,26 +94,26 @@ std::vector<uint8_t> HalContext::scanI2cDevices() {
  */
 bool HalContext::setupWifi() {
     if (hasPlaceholderWifiCredentials(WIFI_SSID, WIFI_PASSWORD)) {
-        Serial.println("WiFi setup skipped because placeholder credentials are still configured.");
-        WiFi.disconnect(true, true);
-        WiFi.mode(WIFI_OFF);
+        WARN_TAG("HAL", "WiFi setup skipped because placeholder credentials are still configured.\n");
         return false;
     }
 
+    INFO_TAG("HAL", "Starting WiFi station mode for SSID '%s'.\n", WIFI_SSID);
     WiFi.mode(WIFI_STA);
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
     const unsigned long connect_started_at = millis();
     while (WiFi.status() != WL_CONNECTED && (millis() - connect_started_at) < kWifiConnectTimeoutMs) {
+        INFO_TAG("HAL", "Waiting for WiFi connection, status=%d.\n", static_cast<int>(WiFi.status()));
         delay(250);
     }
 
     if (WiFi.status() == WL_CONNECTED) {
-        Serial.printf("WiFi connected. Local IP: %s\n", WiFi.localIP().toString().c_str());
+        INFO_TAG("HAL", "WiFi connected. Local IP: %s\n", WiFi.localIP().toString().c_str());
         return true;
     }
 
-    Serial.println("WiFi connection failed.");
+    ERR_TAG("HAL", "WiFi connection failed, final status=%d.\n", static_cast<int>(WiFi.status()));
     WiFi.disconnect(true, true);
     WiFi.mode(WIFI_OFF);
     return false;
@@ -122,15 +132,32 @@ bool HalContext::setupUdp() {
     udp_server_ip_ = udp_config::kServerIp;
     udp_server_port_ = udp_config::kServerPort;
 
+    if (!wifi_connected_) {
+        WARN_TAG(
+            "HAL",
+            "UDP setup skipped because WiFi is not connected. Target remains %s:%u.\n",
+            udp_server_ip_.toString().c_str(),
+            udp_server_port_);
+        return false;
+    }
+
+    INFO_TAG(
+        "HAL",
+        "Opening UDP socket on local port %u with remote target %s:%u.\n",
+        udp_config::kLocalPort,
+        udp_server_ip_.toString().c_str(),
+        udp_server_port_);
+
     const bool begin_ok = udp_.begin(udp_config::kLocalPort);
     if (begin_ok) {
-        Serial.printf(
+        INFO_TAG(
+            "HAL",
             "UDP ready. Local port: %u, remote target: %s:%u\n",
             udp_config::kLocalPort,
             udp_server_ip_.toString().c_str(),
             udp_server_port_);
     } else {
-        Serial.println("UDP setup failed.");
+        ERR_TAG("HAL", "UDP setup failed on local port %u.\n", udp_config::kLocalPort);
     }
 
     return begin_ok;

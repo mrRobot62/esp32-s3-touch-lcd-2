@@ -21,6 +21,14 @@ class BoardDisplay : public lgfx::LGFX_Device {
      */
     BoardDisplay();
 
+    /**
+     * @brief Force the display backlight to a visible state for early bring-up diagnostics.
+     *
+     * This helper is intentionally separate from `init()` so the application can
+     * enable the panel light even before the full display controller starts up.
+     */
+    void forceBacklightOn();
+
   private:
     /** @brief LovyanGFX panel instance for the ST7789 controller. */
     lgfx::Panel_ST7789 panel_;

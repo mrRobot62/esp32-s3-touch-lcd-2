@@ -1,5 +1,31 @@
 # ESP32-S3 Touch LCD 2 – Working Display + Touch Starter Project (Display driver : ST7789T3)
 
+## Important: Reliable Flashing Setup
+
+This board must currently be flashed with the built-in USB JTAG/debug upload path.
+
+The working PlatformIO configuration is:
+
+```ini
+upload_protocol = esp-builtin
+upload_port = /dev/cu.usbmodem101
+```
+
+Do not rely on the regular `esptool` upload path for this board setup.
+It may work once or twice, but it is not stable here and often fails with:
+
+```text
+Failed to connect to ESP32-S3: No serial data received.
+```
+
+Reason:
+
+- The standard serial bootloader handshake is timing-sensitive on this hardware setup.
+- The board was observed to reset during flashing attempts, but not always enter the ROM bootloader reliably.
+- `esp-builtin` uses the onboard USB JTAG/debug path and has proven to be stable in this project.
+
+If flashing suddenly stops working, check `platformio.ini` first and verify that `upload_protocol = esp-builtin` is still active.
+
 This project provides a clean, working, and easy-to-understand starting point for the ESP32-S3 Touch LCD 2.
 
 While the hardware itself is interesting and powerful, there are still very few practical examples available that properly demonstrate how to use:

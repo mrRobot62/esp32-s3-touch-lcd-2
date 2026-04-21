@@ -100,6 +100,7 @@ class HalContext {
     IPAddress udp_server_ip_;
     uint16_t udp_server_port_ = 0;
     bool wifi_connected_ = false;
+    bool udp_ready_ = false;
 };
 
 } // namespace hal

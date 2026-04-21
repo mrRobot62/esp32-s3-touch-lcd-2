@@ -1,6 +1,10 @@
 #define LGFX_USE_V1
 #include "display/BoardDisplay.hpp"
 
+#include <Arduino.h>
+
+#include "log_core.h"
+
 namespace {
 
 constexpr int kDisplayWidth = 240;
@@ -28,22 +32,33 @@ namespace display {
  * behavior without touching the higher-level application code.
  */
 BoardDisplay::BoardDisplay() {
+    INFO_TAG("DISPLAY", "Constructing board display configuration.\n");
+
     // Configure the SPI bus used by the ST7789 display controller. These values
     // define the electrical connection and transfer timing between the ESP32-S3
     // and the display, so this is the first place to adapt when porting to a
     // different board revision or tuning display performance.
     {
+        INFO_TAG(
+            "DISPLAY",
+            "Configuring SPI bus: host=%d, sclk=%d, mosi=%d, miso=%d, dc=%d, write=%d Hz.\n",
+            SPI2_HOST,
+            kPinSclk,
+            kPinMosi,
+            -1,
+            kPinDc,
+            20000000);
         auto cfg = bus_.config();
         cfg.spi_host = SPI2_HOST;
         cfg.spi_mode = 0;
-        cfg.freq_write = 40000000;
-        cfg.freq_read = 16000000;
+        cfg.freq_write = 20000000;
+        cfg.freq_read = 8000000;
         cfg.spi_3wire = false;
         cfg.use_lock = true;
         cfg.dma_channel = SPI_DMA_CH_AUTO;
         cfg.pin_sclk = kPinSclk;
         cfg.pin_mosi = kPinMosi;
-        cfg.pin_miso = kPinMiso;
+        cfg.pin_miso = -1;
         cfg.pin_dc = kPinDc;
         bus_.config(cfg);
         panel_.setBus(&bus_);
@@ -53,6 +68,14 @@ BoardDisplay::BoardDisplay() {
     // color inversion, readable mode, and offsets belong here because they
     // describe how the ST7789 controller is wired to the physical LCD module.
     {
+        INFO_TAG(
+            "DISPLAY",
+            "Configuring panel: cs=%d, width=%d, height=%d, invert=%s, rgb_order=%s.\n",
+            kPinCs,
+            kDisplayWidth,
+            kDisplayHeight,
+            "true",
+            "false");
         auto cfg = panel_.config();
         cfg.pin_cs = kPinCs;
         cfg.pin_rst = -1;
@@ -62,11 +85,11 @@ BoardDisplay::BoardDisplay() {
         cfg.offset_x = 0;
         cfg.offset_y = 0;
         cfg.offset_rotation = 0;
-        cfg.readable = true;
+        cfg.readable = false;
         cfg.invert = true;
         cfg.rgb_order = false;
         cfg.dlen_16bit = false;
-        cfg.bus_shared = false;
+        cfg.bus_shared = true;
         panel_.config(cfg);
     }
 
@@ -74,6 +97,12 @@ BoardDisplay::BoardDisplay() {
     // changes to another backlight pin, requires inverted logic, or needs a
     // different PWM channel/frequency for dimming behavior.
     {
+        INFO_TAG(
+            "DISPLAY",
+            "Configuring backlight: pin=%d, pwm_channel=%d, freq=%d Hz.\n",
+            kPinBacklight,
+            7,
+            44100);
         auto cfg = light_.config();
         cfg.pin_bl = kPinBacklight;
         cfg.invert = false;
@@ -87,6 +116,14 @@ BoardDisplay::BoardDisplay() {
     // the display space. This block is the primary place to change touch pins,
     // address, orientation compensation, or future interrupt integration.
     {
+        INFO_TAG(
+            "DISPLAY",
+            "Configuring touch: addr=0x%02X, sda=%d, scl=%d, width=%d, height=%d.\n",
+            kTouchAddress,
+            kPinTouchSda,
+            kPinTouchScl,
+            kDisplayWidth,
+            kDisplayHeight);
         auto cfg = touch_.config();
         cfg.x_min = 0;
         cfg.x_max = kDisplayWidth - 1;
@@ -107,6 +144,20 @@ BoardDisplay::BoardDisplay() {
     // Bind the fully configured panel to the LovyanGFX device base class so the
     // rest of the application can use the object as a regular display instance.
     setPanel(&panel_);
+    INFO_TAG("DISPLAY", "Board display configuration completed.\n");
+}
+
+/**
+ * @brief Drive the backlight GPIO to a visible state before the panel is fully initialized.
+ *
+ * Some early bring-up situations are easier to diagnose when the backlight is
+ * forced on independently from the LovyanGFX PWM setup. This makes it obvious
+ * whether the issue is purely the panel light or the display controller itself.
+ */
+void BoardDisplay::forceBacklightOn() {
+    pinMode(kPinBacklight, OUTPUT);
+    digitalWrite(kPinBacklight, HIGH);
+    INFO_TAG("DISPLAY", "Backlight GPIO forced HIGH on pin %d.\n", kPinBacklight);
 }
 
 } // namespace display
