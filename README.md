@@ -14,20 +14,20 @@ Most official demos are either minimal, outdated, overly complex, or difficult t
 
 What this project offers
 
-✅ Working display initialization
-✅ Functional touch support
-✅ Clean and readable source code
-✅ Good base for LVGL / Arduino / custom UI projects
-✅ Easier to understand than vendor demo packages
-✅ Ready to extend for your own applications
+✅ Working display initialization<br>
+✅ Functional touch support<br>
+✅ Clean and readable source code<br>
+✅ Good base for LVGL / Arduino / custom UI projects<br>
+✅ Easier to understand than vendor demo packages<br>
+✅ Ready to extend for your own applications<br>
 
-Why this repository exists
+## Why this repository exists
 
 Many developers buy this board because the hardware looks great — but quickly discover that getting display + touch running reliably is harder than expected.
 
 This project saves that time by providing a tested starting point instead of forcing users to reverse-engineer vendor demos or search through forum posts.
 
-Ideal for
+## Ideal for
 
 * Makers
 * ESP32 developers
@@ -36,7 +36,7 @@ Ideal for
 * Learning how this board works
 * Building your own custom firmware
 
-Goal
+## Goal
 
 To become a practical community reference project for anyone working with the ESP32-S3 Touch LCD 2.
 
