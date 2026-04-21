@@ -72,7 +72,7 @@ hal::HalContext hal_context;
 /** @brief Shared board display instance reused by all demo screens. */
 display::BoardDisplay board_display;
 /** @brief Active demo presenter that renders the current validation screens. */
-ui::UiDemo ui_demo(board_display);
+ui::UiDemo ui_demo(board_display, hal_context);
 /** @brief Timestamp of the last runtime heartbeat log. */
 unsigned long last_heartbeat_at = 0;
 
@@ -98,15 +98,6 @@ void Application::setup() {
     board_display.forceBacklightOn();
     INFO_TAG("APP", "Display backlight forced on for bring-up diagnostics.\n");
 
-    hal_context.begin();
-    logI2cDevices(hal_context.i2cDeviceAddresses());
-    INFO_TAG("APP", "WiFi connected: %s\n", hal_context.isWifiConnected() ? "yes" : "no");
-    INFO_TAG(
-        "APP",
-        "UDP target configured as %s:%u\n",
-        hal_context.udpServerIp().toString().c_str(),
-        hal_context.udpServerPort());
-
     INFO_TAG("APP", "Initializing display controller.\n");
     board_display.init();
     INFO_TAG("APP", "Display controller init returned.\n");
@@ -119,6 +110,17 @@ void Application::setup() {
     INFO_TAG("APP", "Display controller initialized, starting smoke test.\n");
 
     runDisplaySmokeTest(board_display);
+
+    INFO_TAG("APP", "Initializing HAL after display bring-up so the shared touch/IMU I2C bus is fully configured.\n");
+    hal_context.begin();
+    logI2cDevices(hal_context.i2cDeviceAddresses());
+    INFO_TAG("APP", "IMU ready: %s at 0x%02X\n", hal_context.isImuReady() ? "yes" : "no", hal_context.imuAddress());
+    INFO_TAG("APP", "WiFi connected: %s\n", hal_context.isWifiConnected() ? "yes" : "no");
+    INFO_TAG(
+        "APP",
+        "UDP target configured as %s:%u\n",
+        hal_context.udpServerIp().toString().c_str(),
+        hal_context.udpServerPort());
 
     INFO_TAG("APP", "Starting UI demo.\n");
     ui_demo.begin();

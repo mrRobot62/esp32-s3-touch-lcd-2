@@ -2,8 +2,11 @@
 
 #include <array>
 #include <cstdint>
+#include <utility>
 
 #include <lvgl.h>
+
+#include "hal/HalContext.hpp"
 
 namespace display {
 class BoardDisplay;
@@ -26,8 +29,9 @@ class UiDemo {
      * @brief Construct the UI controller around the already initialized board display.
      *
      * @param display Reference to the shared board display driver used for LVGL flushes and touch reads.
+     * @param hal Reference to the shared HAL context that provides IMU and network state.
      */
-    explicit UiDemo(display::BoardDisplay& display);
+    UiDemo(display::BoardDisplay& display, hal::HalContext& hal);
 
     /**
      * @brief Initialize LVGL, bind the display and touch callbacks, and load the start screen.
@@ -52,6 +56,8 @@ class UiDemo {
         GraphicTest,
         FontTest,
         LvglWidgets,
+        AccelSimple,
+        AccelGame,
     };
 
     /**
@@ -86,6 +92,16 @@ class UiDemo {
     static constexpr std::size_t kRainbowStripCount = 8U;
 
     /**
+     * @brief Width of the canvas used by the sprite-sequence scene.
+     */
+    static constexpr std::size_t kSpriteCanvasWidth = 248U;
+
+    /**
+     * @brief Height of the canvas used by the sprite-sequence scene.
+     */
+    static constexpr std::size_t kSpriteCanvasHeight = 120U;
+
+    /**
      * @brief Simple particle state used by the animated graphics screen.
      */
     struct ParticleState {
@@ -101,6 +117,8 @@ class UiDemo {
 
     /** @brief Shared hardware display used for LVGL flushes and touch access. */
     display::BoardDisplay& display_;
+    /** @brief Shared HAL context used for IMU-backed demo pages. */
+    hal::HalContext& hal_;
     /** @brief LVGL display handle bound to the LovyanGFX-backed panel. */
     lv_display_t* lv_display_ = nullptr;
     /** @brief LVGL input device handle bound to the touch controller. */
@@ -155,6 +173,10 @@ class UiDemo {
     lv_obj_t* font_screen_ = nullptr;
     /** @brief Widget showcase screen root object. */
     lv_obj_t* widget_screen_ = nullptr;
+    /** @brief Accelerometer diagnostics screen root object. */
+    lv_obj_t* accel_simple_screen_ = nullptr;
+    /** @brief Accelerometer game screen root object. */
+    lv_obj_t* accel_game_screen_ = nullptr;
 
     /** @brief Label that shows the latest touch event state. */
     lv_obj_t* touch_event_value_label_ = nullptr;
@@ -183,6 +205,10 @@ class UiDemo {
     lv_obj_t* graphic_scene_nested_ = nullptr;
     /** @brief Rainbow strip scene container. */
     lv_obj_t* graphic_scene_rainbow_ = nullptr;
+    /** @brief Sprite-sequence scene container. */
+    lv_obj_t* graphic_scene_sprite_ = nullptr;
+    /** @brief Canvas that renders the native LVGL frame-sequence animation. */
+    lv_obj_t* graphic_sprite_canvas_ = nullptr;
     /** @brief Animated bar objects used by the bar-wave scene. */
     std::array<lv_obj_t*, kGraphicBarCount> graphic_bars_{};
     /** @brief Animated particle objects used by the particle scene. */
@@ -193,6 +219,8 @@ class UiDemo {
     std::array<lv_obj_t*, kNestedBoxCount> graphic_nested_boxes_{};
     /** @brief Rainbow strip objects used by the rainbow scene. */
     std::array<lv_obj_t*, kRainbowStripCount> graphic_rainbow_strips_{};
+    /** @brief RGB565 draw buffer backing the sprite-sequence canvas. */
+    std::array<uint16_t, kSpriteCanvasWidth * kSpriteCanvasHeight> graphic_sprite_canvas_buffer_{};
 
     /** @brief Label that shows the current font test title. */
     lv_obj_t* font_title_label_ = nullptr;
@@ -200,6 +228,39 @@ class UiDemo {
     lv_obj_t* font_sample_label_ = nullptr;
     /** @brief Secondary label that explains the current font phase. */
     lv_obj_t* font_info_label_ = nullptr;
+
+    /** @brief Label that shows the latest accelerometer X value. */
+    lv_obj_t* accel_simple_x_label_ = nullptr;
+    /** @brief Label that shows the latest accelerometer Y value. */
+    lv_obj_t* accel_simple_y_label_ = nullptr;
+    /** @brief Label that shows the latest accelerometer Z value. */
+    lv_obj_t* accel_simple_z_label_ = nullptr;
+    /** @brief Label that shows the latest gyroscope X value. */
+    lv_obj_t* accel_simple_gx_label_ = nullptr;
+    /** @brief Label that shows the latest gyroscope Y value. */
+    lv_obj_t* accel_simple_gy_label_ = nullptr;
+    /** @brief Label that shows the latest gyroscope Z value. */
+    lv_obj_t* accel_simple_gz_label_ = nullptr;
+    /** @brief Label that reports the current IMU status on the simple screen. */
+    lv_obj_t* accel_simple_status_label_ = nullptr;
+    /** @brief Outer playfield object of the accelerometer game. */
+    lv_obj_t* accel_game_field_ = nullptr;
+    /** @brief Static target circle in the center of the accelerometer game. */
+    lv_obj_t* accel_game_target_ = nullptr;
+    /** @brief Moving circle driven by the accelerometer values. */
+    lv_obj_t* accel_game_mover_ = nullptr;
+    /** @brief Status label shown below the accelerometer game field. */
+    lv_obj_t* accel_game_status_label_ = nullptr;
+    /** @brief Most recent IMU sample used by the accelerometer screens. */
+    hal::HalContext::ImuSample last_imu_sample_{};
+    /** @brief Timestamp of the last accelerometer sample refresh. */
+    unsigned long accel_last_sample_at_ = 0;
+    /** @brief Remaining blink toggles of the game marker when centered. */
+    uint8_t accel_game_blink_cycles_remaining_ = 0;
+    /** @brief Timestamp of the last blink state transition of the game marker. */
+    unsigned long accel_game_last_blink_at_ = 0;
+    /** @brief Current visibility state of the moving game marker during blinking. */
+    bool accel_game_marker_visible_ = true;
 
     /**
      * @brief Initialize LVGL core services and bind the display and touch drivers.
@@ -235,6 +296,16 @@ class UiDemo {
      * @brief Build the static LVGL widget showcase screen.
      */
     void createWidgetScreen();
+
+    /**
+     * @brief Build the accelerometer diagnostics screen with live sensor values.
+     */
+    void createAccelSimpleScreen();
+
+    /**
+     * @brief Build the accelerometer mini-game screen with a movable marker.
+     */
+    void createAccelGameScreen();
 
     /**
      * @brief Create a reusable screen title label.
@@ -333,6 +404,30 @@ class UiDemo {
      * @param now Current millisecond timestamp used to derive animation progress.
      */
     void updateGraphicRainbow(unsigned long now);
+
+    /**
+     * @brief Update the LVGL-native sprite-sequence scene on the canvas.
+     *
+     * @param now Current millisecond timestamp used to derive frame selection and motion.
+     */
+    void updateGraphicSpriteSequence(unsigned long now);
+
+    /**
+     * @brief Refresh the live IMU values shown on the accelerometer diagnostics screen.
+     */
+    void updateAccelSimpleScreen();
+
+    /**
+     * @brief Refresh the accelerometer mini-game and blink when the target is centered.
+     */
+    void updateAccelGameScreen();
+
+    /**
+     * @brief Read one fresh IMU sample into the cached UI state.
+     *
+     * @return `true` if a fresh IMU sample was read successfully.
+     */
+    bool refreshImuSample();
 
     /**
      * @brief Advance to the next font presentation every three seconds.

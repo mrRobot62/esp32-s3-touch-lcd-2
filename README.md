@@ -96,3 +96,18 @@ To become a practical community reference project for anyone working with the ES
 - Onboard TF card slot for external TF card storage of pictures or files
 - Adapting 22 × GPIO pins for flexible configuration of pin function
 - Onboard camera interface, compatible with mainstream cameras such as OV2640 and OV5640 for image and video acquisition
+
+## Developer Documentation
+
+The following technical notes describe how the current firmware drives the most
+important onboard peripherals and how the implementation is structured for
+future extension:
+
+- [HAL Context](doc/hal-context.md)
+- [Touch Input](doc/touch.md)
+- [QMI8658 IMU](doc/qmi8658-imu.md)
+- [Display Driver](doc/display-driver.md)
+
+These documents are intended for developers who want to adapt the project to a
+different board revision, tune the current behavior, or extend the firmware
+with additional features on top of the existing hardware abstraction.
