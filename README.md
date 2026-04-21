@@ -2,17 +2,17 @@
 Demo programm for a cheap 2" esp32-s3 touch display with 240x320 pixels. Display chip ST7789T3.
 
 ## Display
-<img width="835" height="973" alt="image" src="https://github.com/user-attachments/assets/48341bc4-64f1-41cd-ad30-bc6819e4698e" />
+<img width="951" alt="image" src="https://github.com/user-attachments/assets/48341bc4-64f1-41cd-ad30-bc6819e4698e" />
 
-<img width="951" height="589" alt="image" src="https://github.com/user-attachments/assets/2908c70a-ffde-4a06-a817-3b773dec8d38" />
+<img width="951" alt="image" src="https://github.com/user-attachments/assets/2908c70a-ffde-4a06-a817-3b773dec8d38" />
 
-<img width="951" height="589" alt="image" src="https://github.com/user-attachments/assets/f74c02cf-123d-4389-b80e-1f93a696c2e7" />
+<img width="951" alt="image" src="https://github.com/user-attachments/assets/f74c02cf-123d-4389-b80e-1f93a696c2e7" />
 
 ### Pinout
 <img width="951" alt="image" src="https://github.com/user-attachments/assets/0f019452-c372-494e-8679-4042d7e96835" />
 
 ### What's on board
-<img width="951" height="834" alt="image" src="https://github.com/user-attachments/assets/aec6aff6-ad2a-48de-9e7c-a4e608373e4e" />
+<img width="951" alt="image" src="https://github.com/user-attachments/assets/aec6aff6-ad2a-48de-9e7c-a4e608373e4e" />
 
 ### Key features
 - Equipped with ESP32-S3R8 Xtensa 32-bit LX7 dual-core processor, up to 240MHz main frequency
