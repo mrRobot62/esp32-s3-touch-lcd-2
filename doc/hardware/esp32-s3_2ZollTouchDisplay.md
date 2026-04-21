@@ -45,7 +45,7 @@ https://docs.waveshare.com/ESP32-S3-Touch-LCD-2.8
 ## outline dimensioins
 ![alt text](outline_dimensions.png)
 
-
+```
 # platformio.ini (waveshare)
 ; PlatformIO Project Configuration File
 ;
@@ -80,3 +80,7 @@ build_flags =
   -D ARDUINO_USB_CDC_ON_BOOT=1
   -D LV_CONF_INCLUDE_SIMPLE
   -I src
+
+  ```
+
+  
