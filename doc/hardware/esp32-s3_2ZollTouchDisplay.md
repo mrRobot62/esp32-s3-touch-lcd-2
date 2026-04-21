@@ -45,8 +45,15 @@ https://docs.waveshare.com/ESP32-S3-Touch-LCD-2.8
 ## outline dimensioins
 ![alt text](outline_dimensions.png)
 
+# platformio.ini (project)
+
 ```
-# platformio.ini (waveshare)
+
+```
+
+# original platformio.ini (waveshare)
+
+```
 ; PlatformIO Project Configuration File
 ;
 ;   Build options: build flags, source filter
