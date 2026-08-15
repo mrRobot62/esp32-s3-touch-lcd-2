@@ -1,5 +1,20 @@
 # ESP32-S3 Touch LCD 2 – Working Display + Touch Starter Project (Display driver : ST7789T3)
 
+## Table of Contents
+
+- [Why this repository exists](#why-this-repository-exists)
+- [Ideal for](#ideal-for)
+- [Goal](#goal)
+- [Display](#display)
+  - [Pinout](#pinout)
+  - [What's on board](#whats-on-board)
+  - [Key features](#key-features)
+- [Developer Documentation](#developer-documentation)
+- [Important: Reliable Flashing Setup](#important-reliable-flashing-setup)
+- [LovyanGFX vs Adafruit_GFX](#lovyangfx-vs-adafruit_gfx)
+  - [Why We Use LovyanGFX In This Project](#why-we-use-lovyangfx-in-this-project)
+  - [Conclusion](#conclusion)
+
 ## Why this repository exists
 
 Many developers buy this board because the hardware looks great — but quickly discover that getting display + touch running reliably is harder than expected.
