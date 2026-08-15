@@ -110,3 +110,69 @@ What this project offers
 ✅ Good base for LVGL / Arduino / custom UI projects<br>
 ✅ Easier to understand than vendor demo packages<br>
 ✅ Ready to extend for your own applications<br>
+
+## LovyanGFX vs Adafruit_GFX
+
+This project uses `LovyanGFX` as the board-facing graphics and display driver
+layer. `Adafruit_GFX` is also a well-known and widely used option in the ESP32
+ecosystem, but the two libraries have different strengths.
+
+| Topic | LovyanGFX | Adafruit_GFX |
+| --- | --- | --- |
+| Scope | Full display stack with bus, panel, backlight, and touch integration on many boards | Core graphics abstraction focused mainly on drawing primitives and text |
+| Hardware integration | Strong board-level configuration model for SPI, parallel, panel settings, and touch | Usually combined with additional driver libraries per controller |
+| ESP32 focus | Very strong, especially for high-performance ESP32 and ESP32-S3 use cases | Generic and portable across many MCU families |
+| Performance tuning | Rich configuration surface for frequencies, DMA usage, panel options, rotation, bus sharing, and controller details | Simpler abstraction, usually easier to start with but less specialized for aggressive tuning |
+| Touch integration | Can integrate touch controllers directly into the display object model | Touch is typically handled separately from the graphics layer |
+| Backlight and panel control | Included in the same driver-oriented setup model | Usually handled outside the graphics base class |
+| Driver model | More opinionated and hardware-near | More minimal and generic |
+| Learning curve | Higher, because it exposes more low-level configuration | Lower, because the API surface is narrower and more familiar to many hobby users |
+| Portability between non-ESP32 platforms | Good in some cases, but not its main advantage in this project | One of its strongest advantages |
+| Suitability for this board | Very good, because this board needs coordinated setup of panel, touch, SPI details, and runtime tuning | Possible, but would usually require more separate pieces and more board-specific glue code |
+
+### Why We Use LovyanGFX In This Project
+
+The Waveshare ESP32-S3 Touch LCD 2 board is not just a simple framebuffer-style
+display target. It combines several hardware concerns that benefit from a more
+integrated display library:
+
+- the ST7789 panel needs board-specific bus and controller configuration
+- the touch controller is part of the same practical bring-up problem
+- performance matters on a small animated UI
+- reliable orientation, panel behavior, and color handling need hardware-near control
+- the project aims to be a usable starter for further custom firmware, not only a minimal drawing demo
+
+`LovyanGFX` fits that goal well because it gives the project one coherent place
+to describe:
+
+- SPI bus wiring and transfer settings
+- panel dimensions and controller options
+- backlight handling
+- touch-controller binding
+- display behavior tuning required for stable bring-up
+
+With `Adafruit_GFX`, the project would likely need a more fragmented setup:
+
+- one library for the graphics API
+- one driver for the ST7789 controller
+- separate touch handling
+- separate backlight handling
+- more manual coordination between those layers
+
+That approach is not wrong, but it is less aligned with the purpose of this
+repository, which is to provide a practical, working, board-specific reference
+project for this exact hardware.
+
+### Conclusion
+
+`Adafruit_GFX` remains an excellent and proven graphics foundation, especially
+when portability and a minimal abstraction are the main goals.
+
+For this project, however, `LovyanGFX` is the better fit because it provides:
+
+- tighter ESP32-focused hardware integration
+- stronger control over panel and bus behavior
+- a cleaner path to combine display and touch bring-up
+- better alignment with the performance and configuration needs of this board
+
+That is why this repository uses `LovyanGFX` as the display foundation.
